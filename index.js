@@ -25,14 +25,6 @@ app.post("/upload", upload.single("file"), (req, res) => {
 
 	spawn(`convert`, [
 		req.file.path,
-		"-resize",
-		"250x250",
-		"-gravity",
-		"center",
-		"-background",
-		"white",
-		"-extent",
-		"250x250",
 		"-polaroid",
 		"0",
 		`${req.file.path.split(".")[0]}-processed.png`,
