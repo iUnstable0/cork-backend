@@ -3,7 +3,7 @@ const express = require("express");
 const app = express();
 const upload = require("./upload");
 
-const { spawn } = require("child_process");
+const { spawn, exec } = require("child_process");
 
 const gm = require("gm");
 const fs = require("fs");
@@ -17,29 +17,38 @@ app.post("/upload", upload.single("file"), (req, res) => {
 	// Handle the uploaded file
 	res.json({ message: "File uploaded successfully!" });
 
-	console.log(
-		`convert ${req.file.path} -polaroid 0 ${
-			req.file.path.split(".")[0]
-		}-processed.png`
-	);
+	const command = `python convert.py ${req.file.path} ${
+		req.file.path.split(".")[0]
+	}-polaroid.png`;
 
-	spawn(`convert`, [
-		req.file.path,
-		"-polaroid",
-		"0",
-		`${req.file.path.split(".")[0]}-processed.png`,
-	]);
+	exec(command, (error, stdout, stderr) => {
+		if (error) {
+			console.error(`exec error: ${error}`);
+			return;
+		}
+		if (stderr) {
+			console.error(`stderr: ${stderr}`);
+			return;
+		}
+		console.log(`stdout: ${stdout}`);
+		console.log("Image processing complete");
+	});
 
-	// imageMagick()
-	// .command("convert")
-	// // .in("-caption",  "mycaption")
-	// .in('"' + req.file.path + '"')
-	// // .in("-thumbnail",  "250x250")
-	// .in("polaroid", "0")
-	//  // insert other options...
-	// .write(`"${req.file.path.split(".")[0]}_processed.png"`, function (err) {
-	//    if (err) return console.log(err);
-	// });
+	// const options = [
+	// 	req.file.path,
+	// 	"-background",
+	// 	"none",
+	// 	"-polaroid",
+	// 	"5", // Adjusts the rotation angle for a more natural look. Change as needed.
+	// 	"-bordercolor",
+	// 	"white", // Sets the border color to white.
+	// 	"-border",
+	// 	"6", // Adjusts the border size. You can increase/decrease this value.
+	// 	`${req.file.path.split(".")[0]}-polaroid.png`, // The output file with a modified name to reflect the polaroid effect.
+	// ];
+
+	// console.log(`convert ${options.join(" ")}`);
+	// spawn(`convert`, options);
 });
 
 app.get("/", (req, res) => {
