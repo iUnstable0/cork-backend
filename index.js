@@ -1,6 +1,10 @@
+const { Server } = require("socket.io");
+
 const express = require("express");
 
 const app = express();
+var cors = require("cors");
+app.use(cors());
 // const upload = require("./upload");
 
 const { spawn, exec } = require("child_process");
@@ -17,26 +21,31 @@ function randomNumber(min, max) {
 	return Math.random() * (max - min) + min;
 }
 
-app.use(express.json());
+app.use(express.static("storage"));
+app.use(express.json({ limit: "15mb" }));
+// app.use(express.urlencoded({ limit: "10mb" }));
 
-app.post("/upload", upload.single("file"), async (req, res) => {
-	const storageData = fs.readFileSync("data.json");
-	const jsonData = JSON.parse(storageData);
+// const io = new Server(3002, {
+// 	path: "/",
+// 	cors: {
+// 		origin: `*`,
+// 	},
+// });
 
-	console.log(req.body.title);
+// io.on("connection", (socket) => {
+// 	const { channel } = socket.handshake.auth;
 
-	jsonData[Date.now()] = {
-		title: req.body.title,
-		description: req.body.description,
-		// random between -20 and -10 or 10 and 20
-		frame_angle:
-			randomNumber(0, 2) > 1 ? randomNumber(0, 5) : randomNumber(-5, -0),
-		// or any other data we want to add in that object
-	};
+// 	if (!channel) {
+// 		socket.disconnect();
 
-	fs.writeFileSync("data.json", JSON.stringify(jsonData, null, 4));
+// 		return;
+// 	}
 
-	const fileBuffer = Buffer.from(file, "base64");
+// 	socket.join(channel);
+// });
+
+app.post("/upload", async (req, res) => {
+	const fileBuffer = Buffer.from(req.body.file, "base64");
 
 	if (fileBuffer.length > 8 * 1024 * 1024) {
 		return res.status(400).json({ message: "File is too large" });
@@ -62,6 +71,27 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 		return res.status(400).json({ message: "File is corrupted" });
 	}
 
+	const storageData = fs.readFileSync("data.json");
+	const jsonData = JSON.parse(storageData);
+	const timestamp = Date.now();
+
+	console.log(req.body.title);
+
+	jsonData[timestamp] = {
+		title: req.body.title,
+		description: req.body.description,
+		// random between -20 and -10 or 10 and 20
+		frame_angle:
+			randomNumber(0, 2) > 1 ? randomNumber(0, 5) : randomNumber(-5, -0),
+		// or any other data we want to add in that object
+	};
+
+	fs.writeFileSync("data.json", JSON.stringify(jsonData, null, 4));
+
+	// Publish to new images channel
+
+	// io.to("new-images").emit("new-image");
+
 	// const fileUUID = uuid();
 	// const filePath = path.join(
 	// 	process.cwd(),
@@ -69,7 +99,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 	// 	`${fileUUID}.${fileExtension}`
 	// );
 
-	const filePath = `storage/${Date.now()}.${fileExtension}`;
+	const filePath = `storage/${timestamp}.${fileExtension}`;
 
 	fs.writeFileSync(filePath, fileBuffer);
 
@@ -93,19 +123,27 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 
 	const command = `python convert.py ${filePath} ${
 		filePath.split(".")[0]
-	}-polaroid.${fileExtension}`;
+	}-polaroid.png`;
 
 	exec(command, (error, stdout, stderr) => {
 		if (error) {
 			console.error(`exec error: ${error}`);
 			return;
 		}
+
 		if (stderr) {
 			console.error(`stderr: ${stderr}`);
 			return;
 		}
+
 		console.log(`stdout: ${stdout}`);
 		console.log("Image processing complete");
+
+		// Publish image name to channel processed images
+		// io.to("processed-images").emit("image-processed", {
+		// 	image: `${filePath.split(".")[0]}-polaroid.png`,
+		// 	timestamp,
+		// });
 	});
 });
 
