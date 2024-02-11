@@ -11,21 +11,26 @@ const imageMagick = gm.subClass({ imageMagick: "7+" });
 
 const crypto = require("crypto");
 
+function randomNumber(min, max) {
+	return Math.random() * (max - min) + min;
+}
+
 app.use(express.json());
 
 app.post("/upload", upload.single("file"), (req, res) => {
-
-	const storageData = fs.readFileSync('data.json');
+	const storageData = fs.readFileSync("data.json");
 	const jsonData = JSON.parse(storageData);
 
 	jsonData[Date.now()] = {
 		title: req.body.title,
 		description: req.body.description,
-		frame_angle: req.body.frame_angle
+		// random between -20 and -10 or 10 and 20
+		frame_angle:
+			randomNumber(0, 2) > 1 ? randomNumber(10, 20) : randomNumber(-20, -10),
 		// or any other data we want to add in that object
 	};
 
-	fs.writeFileSync('data.json', JSON.stringify(jsonData));
+	fs.writeFileSync("data.json", JSON.stringify(jsonData, null, 4));
 
 	// Handle the uploaded file
 	res.json({ message: "File uploaded successfully!" });
@@ -49,10 +54,10 @@ app.post("/upload", upload.single("file"), (req, res) => {
 });
 
 app.get("/gallery", (req, res) => {
-	const storageData = fs.readFileSync('data.json');
+	const storageData = fs.readFileSync("data.json");
 	const jsonData = JSON.parse(storageData);
-	res.send(jsonData)
-})
+	res.send(jsonData);
+});
 
 app.get("/", (req, res) => {
 	res.send("Hello World");
