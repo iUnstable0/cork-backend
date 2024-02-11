@@ -153,6 +153,10 @@ app.get("/gallery", (req, res) => {
 	res.send(jsonData);
 });
 
+app.get("/home", (req, res) => {
+	res.sendFile(__dirname + "/index.html");
+});
+
 app.get("/", (req, res) => {
 	res.send("Hello World");
 });
