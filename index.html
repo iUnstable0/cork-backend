@@ -1,56 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-        
-        <style>
-html {
-  height: 100%;
-  width: 100%;
-}
-
-#polar {
-  color: #000000;
-  background-color: #f0f0e6;
-  width: 200px;
-  padding: 10px;
-  margin: 10px;
-  border: 1px solid #949494;
-  border-radius: 2px;
-  display: inline-block;
-  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
-}
-
-img {
-  display: block;
-  margin: 0 auto;
-  border: 1px solid black;
-  border-radius: 1px;
-  padding: -20px
-}
-
-input {
-    
-}
-
-body {
-    background-image: url(https://www.google.com/url?sa=i&url=https%3A%
-}
-        </style>
-
-		<script src="script.js"></script>
-		<link rel="stylesheet" href="style.css" />
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Image Upload and Display</title>
-	</head>
-	<body>
-		<div id="polar">
-			<input type="file" accept=".jpg, .png" onchange="displayImage(this)" />
-			<br />
-
-			<img id="myImg" src="#" alt="Your image" height="100%" width="100%" />
-		</div>
-
-
-	</body>
+<html>
+<head>
+  <title>File Upload</title>
+</head>
+<body>
+  <h1>File Upload</h1>
+  <form action="http://localhost:3000/upload" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" required>
+    <button type="submit">Upload</button>
+  </form>
+</body>
 </html>
+          
