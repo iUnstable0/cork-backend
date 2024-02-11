@@ -15,7 +15,17 @@ app.use(express.json());
 
 app.post("/upload", upload.single("file"), (req, res) => {
 
-	console.log(req)
+	const storageData = fs.readFileSync('data.json');
+	const jsonData = JSON.parse(storageData);
+
+	jsonData[Date.now()] = {
+		title: req.body.title,
+		description: req.body.description,
+		frame_angle: req.body.frame_angle
+		// or any other data we want to add in that object
+	};
+
+	fs.writeFileSync('data.json', JSON.stringify(jsonData));
 
 	// Handle the uploaded file
 	res.json({ message: "File uploaded successfully!" });
@@ -36,23 +46,13 @@ app.post("/upload", upload.single("file"), (req, res) => {
 		console.log(`stdout: ${stdout}`);
 		console.log("Image processing complete");
 	});
-
-	// const options = [
-	// 	req.file.path,
-	// 	"-background",
-	// 	"none",
-	// 	"-polaroid",
-	// 	"5", // Adjusts the rotation angle for a more natural look. Change as needed.
-	// 	"-bordercolor",
-	// 	"white", // Sets the border color to white.
-	// 	"-border",
-	// 	"6", // Adjusts the border size. You can increase/decrease this value.
-	// 	`${req.file.path.split(".")[0]}-polaroid.png`, // The output file with a modified name to reflect the polaroid effect.
-	// ];
-
-	// console.log(`convert ${options.join(" ")}`);
-	// spawn(`convert`, options);
 });
+
+app.get("/gallery", (req, res) => {
+	const storageData = fs.readFileSync('data.json');
+	const jsonData = JSON.parse(storageData);
+	res.send(jsonData)
+})
 
 app.get("/", (req, res) => {
 	res.send("Hello World");
