@@ -14,6 +14,9 @@ const crypto = require("crypto");
 app.use(express.json());
 
 app.post("/upload", upload.single("file"), (req, res) => {
+
+	console.log(req)
+
 	// Handle the uploaded file
 	res.json({ message: "File uploaded successfully!" });
 
