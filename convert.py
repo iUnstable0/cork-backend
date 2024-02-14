@@ -18,7 +18,7 @@ def dull_highlights(image):
     image = enhancer.enhance(0.9)
     return image
 
-def add_grain(image, intensity=0.05, monochromatic=True):
+def add_grain(image, intensity=0.25, monochromatic=True):
     # Generate noise
     np_image = np.array(image)
     if monochromatic:
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     image = Image.open(source_path)
 
     # Apply blur
-    # image = apply_blur(image, radius=1)  # Feel free to adjust the radius
+    image = apply_blur(image, radius=1)  # Feel free to adjust the radius
 
     # Apply the other effects
     image = adjust_curves(image)
